@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { cameraErrorMessage, stopCamera } from '../lib/camera.ts';
+assert.match(cameraErrorMessage({name:'NotAllowedError'}),/blocked/);
+assert.match(cameraErrorMessage({name:'NotFoundError'}),/No camera/);
+assert.match(cameraErrorMessage({name:'NotReadableError'}),/another app/);
+assert.match(cameraErrorMessage({name:'SecurityError'}),/regular browser/);
+assert.match(cameraErrorMessage(null),/couldn’t start/);
+let stopped=0;
+stopCamera({getTracks:()=>[{stop:()=>stopped++},{stop:()=>stopped++}]});
+assert.equal(stopped,2);
+stopCamera(null);
+console.log('Camera error guidance and stopping every media track passed. Hardware capture has not been tested.');

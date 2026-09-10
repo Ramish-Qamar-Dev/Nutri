@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { mealParts, calorieSlices } from '../lib/meal-model.ts';
+const foods=[{name:'Salmon',category:'Protein & fats',grams:100,protein:20,carbs:0,fat:13,fiber:0},{name:'Rice',category:'Grains',grams:150,protein:4,carbs:42,fat:1,fiber:1}];
+const parts=mealParts(foods,[100,150],1);
+assert.equal(parts[0].kcal,197);assert.equal(parts[1].kcal,193);
+const half=mealParts(foods,[100,150],.5);
+assert.equal(half.reduce((s,p)=>s+p.kcal,0),195);
+const adjusted=mealParts(foods,[50,300],2);
+assert.equal(adjusted[0].grams,100);assert.equal(adjusted[0].kcal,197);assert.equal(adjusted[1].kcal,772);
+const slices=calorieSlices(parts.map(p=>p.kcal));
+assert.equal(slices[0].start,0);assert.equal(slices[0].end,slices[1].start);assert.ok(Math.abs(slices[1].end-Math.PI*2)<1e-10);
+assert.ok(Math.abs((slices[0].end/(Math.PI*2))-197/390)<1e-10);
+assert.deepEqual(calorieSlices([0,0]),[{start:0,end:0},{start:0,end:0}]);
+assert.ok(mealParts(foods,[0,0],2).every(p=>p.kcal===0&&Number.isFinite(p.kcal)));
+console.log('Calorie model: ingredient calories, portion scaling, weight editing, proportional slices, and zero-portion handling passed.');

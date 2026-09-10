@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {hashPassword,verifyPassword,seal,unseal,token,digest,constantEqual} from '../lib/admin-crypto.ts';
+import {planSchema,setupSchema} from '../lib/admin-validation.ts';
+const password='A unique test passphrase 123!';
+const a=await hashPassword(password),b=await hashPassword(password);
+assert.notEqual(a,b);assert.ok(!a.includes(password));assert.equal(await verifyPassword(password,a),true);assert.equal(await verifyPassword('wrong password',a),false);assert.equal(await verifyPassword(password,'invalid'),false);
+const key='a'.repeat(64),secret='test-provider-secret-not-a-real-key',encrypted=seal(secret,key);
+assert.ok(!encrypted.includes(secret));assert.equal(unseal(encrypted,key),secret);assert.notEqual(encrypted,seal(secret,key));assert.throws(()=>unseal(encrypted,'b'.repeat(64)));assert.throws(()=>unseal(encrypted.slice(0,-2)+'ff',key));assert.throws(()=>seal(secret,'short'));
+assert.equal(token().length,43);assert.notEqual(token(),token());assert.equal(digest('x').length,64);assert.equal(constantEqual('x','x'),true);assert.equal(constantEqual('x','y'),false);
+assert.equal(setupSchema.safeParse({email:'owner@example.test',password:'short',setupToken:'a'.repeat(64)}).success,false);
+const plan={name:'Starter',amountMinor:499,currency:'USD',interval:'monthly',analysisLimit:30,description:'',status:'draft'};
+assert.equal(planSchema.safeParse(plan).success,true);
+for(const change of [{amountMinor:-1},{amountMinor:1.5},{analysisLimit:0},{currency:'FAKE'},{status:'active'},{customerVisible:true},{name:'  '}])assert.equal(planSchema.safeParse({...plan,...change}).success,false);
+console.log('Security unit tests passed: salted password hashing, wrong passwords, encryption integrity, token generation, plan validation, forbidden publication.');

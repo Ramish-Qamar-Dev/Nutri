@@ -1,0 +1,58 @@
+.app-preview-label{font-size:12px;letter-spacing:2px;color:#b5c8a0}
+.enhanced-stage{padding:22px 24px}
+.stage-reset{display:flex;gap:7px;align-items:center;background:transparent;color:#c9dcaf;font-size:13px;min-height:44px;padding:8px}
+.stage-gesture-hint{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:#b6c6aa;margin-top:10px}
+.touch-model{touch-action:pan-y;user-select:none;cursor:grab;max-height:530px}
+.touch-model:active{cursor:grabbing}
+.model-hit-region{cursor:pointer;outline:none}
+.model-hit-region:focus-visible{stroke:#fff;stroke-width:4}
+.selected-ingredient-dock{display:flex;align-items:center;gap:13px;border:1px solid #d6ed9b2a;background:#0d1712b3;padding:17px 19px;border-radius:13px;margin-top:-8px;position:relative}
+.selected-ingredient-dock>span{height:31px;width:6px;border-radius:5px;flex-shrink:0}
+.selected-ingredient-dock>div{flex:1;min-width:0}
+.selected-ingredient-dock strong{font-size:17px;font-weight:500;overflow-wrap:anywhere}
+.selected-ingredient-dock small{display:block;font-size:12px;color:#b5c6a6;margin-top:5px}
+.selected-ingredient-dock>b{font-size:26px;font-weight:450;white-space:nowrap;font-variant-numeric:tabular-nums}
+.selected-ingredient-dock>b small{display:inline;font-size:13px}
+.stage-controls{display:flex;gap:16px;justify-content:space-between;margin-top:18px}
+.stage-button-group{display:flex;gap:12px;align-items:center}
+.stage-button-group>span{font-size:14px;min-width:49px;text-align:center;color:#c6d7b7;font-variant-numeric:tabular-nums}
+.stage-button-group button{width:44px;height:44px;display:grid;place-items:center;border:1px solid #b9d59936;border-radius:10px;background:#ffffff06;color:#e0eccf}
+.stage-button-group button:disabled{opacity:.35;cursor:default}
+.stage-angle{display:flex;align-items:center;gap:16px;margin:22px 0;color:#b9cdae;font-size:14px}
+.stage-angle>span{white-space:nowrap}
+.stage-angle>span:last-child{width:35px;text-align:right;font-variant-numeric:tabular-nums}
+.stage-angle [data-slot=slider]{min-height:32px}
+.stage-separate{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:19px;border-top:1px solid #ffffff16;font-size:14px;color:#dce8d1;cursor:pointer}
+.stage-separate small{display:block;font-size:12px;color:#adbf9f;margin-top:5px}
+.stage-separate [data-slot=switch]{width:44px;height:25px;flex-shrink:0}
+.stage-separate [data-slot=switch-thumb]{width:20px;height:20px}
+.model-toolbar [role=tab]{min-height:44px}
+.ingredient-legend>button{min-height:52px}
+.error-message a{margin-top:10px}
+@media(max-width:800px){
+ .topbar{min-height:73px;padding:17px 4%;flex-wrap:nowrap;backdrop-filter:none;background:#0b1311}
+ .topbar .brand{font-size:24px}.app-preview-label{font-size:12px;letter-spacing:1.3px}
+ .screen-tabs{position:fixed;bottom:0;left:0;right:0;z-index:40;width:100%;height:auto;border-radius:20px 20px 0 0;border:1px solid #71866050;border-bottom:0;background:#101b16f5;backdrop-filter:blur(18px);padding:9px max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));gap:8px;box-shadow:0 -12px 40px #0004}
+ .screen-tabs [role=tab]{display:flex;flex-direction:column;gap:5px;min-height:57px;padding:8px 5px;font-size:12px;border-radius:12px}
+ .screen-tabs [role=tab] svg{display:block;width:20px;height:20px}
+ .cinema-heading{margin-bottom:24px}.cinema-heading h1{font-size:clamp(36px,7vw,52px)}
+ .cinema-heading p{margin-top:16px}.eyebrow>.scene-number{padding-right:10px;margin-right:0}
+ footer{padding-bottom:calc(106px + env(safe-area-inset-bottom))}
+ main{padding-top:27px}.meal-hud{margin-bottom:24px}
+ .explorer-screen .explorer-grid{gap:16px}.enhanced-stage{padding:15px 17px 20px}
+ .ingredient-legend{display:flex;overflow-x:auto;scroll-snap-type:x proximity;padding:15px;gap:10px}
+ .ingredient-legend>button{min-width:180px;max-width:240px;flex:0 0 auto;scroll-snap-align:start;display:grid;grid-template-columns:25px 1fr;gap:8px 10px;align-items:center;padding:12px}
+ .ingredient-legend>button strong{grid-column:2;margin:0}
+ .ingredient-detail{padding:24px}.ingredient-detail h3{font-size:28px}.detail-energy strong{font-size:50px}
+ .detail-nutrients{grid-template-columns:1fr 1fr}.detail-portion input{min-height:44px}
+ .photo-source-actions button{min-height:48px}.remove-photo{width:44px;height:44px}
+ .cinematic-screen{scroll-margin-bottom:95px}
+}
+@media(max-width:420px){
+ .stage-controls{gap:12px;flex-wrap:wrap}.stage-button-group{gap:6px;flex:1;justify-content:space-between;min-width:140px}.stage-button-group>span{min-width:44px;font-size:13px}
+ .stage-button-group button{width:42px;height:44px}.stage-angle{gap:10px;font-size:13px}
+ .enhanced-stage{padding-inline:13px}.selected-ingredient-dock{padding:14px 12px;gap:9px}
+ .selected-ingredient-dock strong{font-size:16px}.selected-ingredient-dock>b{font-size:24px}
+ .stage-gesture-hint{font-size:12px;gap:6px}.model-toolbar [role=tab]{font-size:13px;padding-inline:8px}
+ .stage-separate{gap:12px}.detail-nutrients{gap:16px 12px}
+}

@@ -1,0 +1,14 @@
+import { env } from 'cloudflare:workers';
+import { cookies } from 'next/headers';
+import { digest,unseal } from './admin-crypto';
+export const ADMIN_COOKIE=process.env.NODE_ENV==='production'?'__Host-nutrilens-admin':'nutrilens-admin-dev';
+export const cookieOptions={httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'strict' as const,path:'/',maxAge:8*60*60};
+export function database(){if(!env.DB)throw new Error('Database unavailable');return env.DB;}
+export type Admin={id:string;email:string;password_hash:string};
+export async function currentAdmin(){const raw=(await cookies()).get(ADMIN_COOKIE)?.value;if(!raw||!/^[A-Za-z0-9_-]{43}$/.test(raw))return null;const now=Date.now();const row=await database().prepare('SELECT a.id,a.email,s.token_hash FROM admin_sessions s JOIN admin_accounts a ON a.id=s.admin_id WHERE s.token_hash=? AND s.expires_at>? AND s.last_seen>?').bind(digest(raw),now,now-30*60*1000).first<{id:string;email:string;token_hash:string}>();if(!row)return null;await database().prepare('UPDATE admin_sessions SET last_seen=? WHERE token_hash=? AND expires_at>?').bind(now,row.token_hash,now).run();return {id:row.id,email:row.email};}
+export async function adminExists(){return !!await database().prepare('SELECT id FROM admin_accounts LIMIT 1').first();}
+export async function effectiveApiKey(){const row=await database().prepare("SELECT ciphertext FROM service_secrets WHERE name='gemini'").first<{ciphertext:string}>();if(row){if(!env.ADMIN_VAULT_KEY)throw new Error('Vault unavailable');return unseal(row.ciphertext,env.ADMIN_VAULT_KEY);}return env.GEMINI_API_KEY;}
+export async function hasApiKey(){return !!(await database().prepare("SELECT name FROM service_secrets WHERE name='gemini'").first()||env.GEMINI_API_KEY);}
+export function auditStatement(actor:string,action:string,target=''){return database().prepare('INSERT INTO admin_audit(id,actor,action,target,created_at) VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor,action,target,Date.now());}
+export async function limited(key:string,max:number,period=15*60*1000){const now=Date.now();const result=await database().prepare('INSERT INTO request_limits(key,count,reset_at) VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN reset_at<=? THEN 1 ELSE count+1 END,reset_at=CASE WHEN reset_at<=? THEN excluded.reset_at ELSE reset_at END RETURNING count').bind(key,now+period,now,now).first<{count:number}>();return !result||result.count>max;}
+export async function cleanup(){const now=Date.now();await database().batch([database().prepare('DELETE FROM admin_sessions WHERE expires_at<? OR last_seen<?').bind(now,now-30*60*1000),database().prepare('DELETE FROM request_limits WHERE reset_at<?').bind(now-86400000),database().prepare('DELETE FROM admin_audit WHERE created_at<?').bind(now-90*86400000)]);}

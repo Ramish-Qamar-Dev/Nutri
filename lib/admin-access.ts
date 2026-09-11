@@ -1,3 +1,4 @@
+import { GENERATION_URL,providerFailure } from './gemini-provider.mjs';
 type Identity = {userId:string;email:string};
 export function adminEmails(config?:string) {
   return [...new Set((config??'').split(',').map(email=>email.trim().toLowerCase()).filter(email=>/^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(email)))];
@@ -9,13 +10,18 @@ export function adminAccess(user:Identity|null,config?:string):'signed-out'|'for
 export const ADMIN_HEADERS={'Cache-Control':'private, no-store, max-age=0','X-Content-Type-Options':'nosniff'};
 
 export async function testProvider(apiKey:string|undefined,send:typeof fetch=fetch) {
-  if(!apiKey)return {ok:false,message:'No server API key is configured. Add GEMINI_API_KEY in the hosting settings first.'};
+  if(!apiKey)return {ok:false,message:'No Gemini key is saved. Add a key in the AI service settings.'};
   try{
-    // Model metadata only: no meal image, generation request, or customer data.
-    const response=await send('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest',{headers:{'x-goog-api-key':apiKey},signal:AbortSignal.timeout(12_000)});
-    if(response.ok)return {ok:true,message:'Google accepted the server key and returned model information. Meal generation and available quota have not been tested.'};
-    if([400,401,403].includes(response.status))return {ok:false,message:'Google rejected the configured key. Check the key and its restrictions in the provider console.'};
-    if(response.status===429)return {ok:false,message:'Google reported a quota or rate limit. Review provider usage before retrying.'};
-    return {ok:false,message:'The provider could not confirm model availability. Check the model and try again later.'};
-  }catch{return {ok:false,message:'The server could not reach Google. Check outbound network access and try again.'};}
+    const response=await send(GENERATION_URL,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify({contents:[{parts:[{text:'Return the JSON object {"ok":true}.'}]}],generationConfig:{responseMimeType:'application/json',responseSchema:{type:'OBJECT',properties:{ok:{type:'BOOLEAN'}},required:['ok']},maxOutputTokens:256,thinkingConfig:{thinkingLevel:'low'}}}),signal:AbortSignal.timeout(30_000)});
+    if(!response.ok)return {ok:false,...await providerFailure(response)};
+    const data=await response.json() as {candidates?:{finishReason?:string;content?:{parts?:{text?:string;thought?:boolean}[]}}[]};
+    const candidate=data.candidates?.[0];
+    const raw=candidate?.content?.parts?.filter(p=>!p.thought).map(p=>p.text??'').join('')??'';
+    let valid=false;try{valid=JSON.parse(raw).ok===true;}catch{}
+    if(candidate?.finishReason!=='STOP'||!valid)return {ok:false,code:'PROVIDER_TEST_INCOMPLETE',message:'Google accepted the request but did not finish a valid test response. Please retry.'};
+    return {ok:true,message:'Google successfully generated a structured response with the saved key. Text generation works now; photo analysis and future quota are not guaranteed.'};
+  }catch(error){
+    if(error instanceof Error&&['TimeoutError','AbortError'].includes(error.name))return {ok:false,code:'PROVIDER_TIMEOUT',message:'Google did not finish the generation test within 30 seconds. Try again shortly.'};
+    return {ok:false,code:'PROVIDER_CONNECTION_FAILED',message:'The server could not complete the Google generation test. Check outbound network access and try again.'};
+  }
 }

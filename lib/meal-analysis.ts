@@ -1,3 +1,4 @@
+import { GENERATION_URL,providerFailure } from './gemini-provider.mjs';
 import { z } from "zod";
 
 export const foodSchema = z.object({
@@ -76,7 +77,7 @@ export async function handleAnalysis(request: Request, send: typeof fetch = fetc
   // Only the server supplies this credential. Never accept, log or return a user's key.
   try {
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(55_000)]);
-    const sendOnce = () => send("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent", {
+    const sendOnce = () => send(GENERATION_URL, {
       method:"POST", headers:{"Content-Type":"application/json", "x-goog-api-key":serverApiKey},
       body: JSON.stringify({
         systemInstruction: {parts:[{text:prompt}]},
@@ -89,10 +90,10 @@ export async function handleAnalysis(request: Request, send: typeof fetch = fetc
     // Retry a transient overload once, within the original request deadline.
     const upstream = first.status === 503 && !signal.aborted ? await sendOnce() : first;
     if (!upstream.ok) {
-      if ([400,401,403].includes(upstream.status)) return json({error:"Photo analysis is temporarily unavailable. Please try again later."},503);
-      if (upstream.status === 429) return json({error:"Photo analysis is busy right now. Please try again later."},429);
-      if (upstream.status === 404) return json({error:"The analysis model is unavailable. Please contact the administrator to update the AI service.",code:"PROVIDER_MODEL_UNAVAILABLE"},502);
-      return json({error:"Gemini is temporarily unavailable. Your photo is still here; please try again."},502);
+      const diagnostic=await providerFailure(upstream);
+      console.error('meal_provider_failure',{code:diagnostic.code,status:upstream.status});
+      const error=diagnostic.code==='PROVIDER_QUOTA'?'Photo analysis has reached the provider’s usage limit. Please try again later.':diagnostic.code==='PROVIDER_UNAVAILABLE'?'Photo analysis is busy. Please try again shortly.':'Photo analysis needs attention from the administrator. Your photo is still here.';
+      return json({error,code:diagnostic.code},upstream.status===429?429:upstream.status>=500||upstream.status===404?502:503);
     }
     const response = await upstream.json() as {candidates?: {finishReason?:string;content?:{parts?:{text?:string;thought?:boolean}[]}}[]};
     const candidate = response.candidates?.[0];

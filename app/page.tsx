@@ -202,7 +202,7 @@ export default function Home() {
 
       if (controller.signal.aborted) return;
 
-      const scale = Math.min(1,1600/Math.max(img.width,img.height));
+      const scale = Math.min(1,1280/Math.max(img.width,img.height));
 
       const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));
 
@@ -210,7 +210,7 @@ export default function Home() {
 
       ctx.fillStyle="#ffffff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
-      const image=canvas.toDataURL("image/jpeg",0.85).split(",")[1];
+      const image=canvas.toDataURL("image/jpeg",0.8).split(",")[1];
 
       if (!image || image.length>4_200_000) throw new Error("Choose a smaller photo and try again.");
 

@@ -14,7 +14,7 @@ assert.match(ADMIN_HEADERS['Cache-Control'],/no-store/);
 let called=false;
 assert.equal((await testProvider(undefined,async()=>{called=true;})).ok,false);assert.equal(called,false);
 const key='test-provider-secret-do-not-return';
-const result=await testProvider(key,async(url,options)=>{assert.equal(url,'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent');assert.equal(options.headers['x-goog-api-key'],key);assert.equal(options.method,'POST');assert.equal(JSON.parse(options.body).generationConfig.responseMimeType,'application/json');return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:'{"ok":true}'}]}}]});});
+const result=await testProvider(key,async(url,options)=>{assert.equal(url,'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent');assert.equal(options.headers['x-goog-api-key'],key);assert.equal(options.method,'POST');assert.equal(JSON.parse(options.body).generationConfig.responseMimeType,'application/json');return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:'{"ok":true}'}]}}]});});
 assert.equal(result.ok,true);
 assert.match(result.message,/successfully generated/);
 for(const status of [400,401,403,429,500]){const failure=await testProvider(key,async()=>new Response(key,{status}));assert.equal(failure.ok,false);assert.ok(!JSON.stringify(failure).includes(key));}

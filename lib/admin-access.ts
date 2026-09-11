@@ -12,7 +12,7 @@ export const ADMIN_HEADERS={'Cache-Control':'private, no-store, max-age=0','X-Co
 export async function testProvider(apiKey:string|undefined,send:typeof fetch=fetch) {
   if(!apiKey)return {ok:false,message:'No Gemini key is saved. Add a key in the AI service settings.'};
   try{
-    const response=await send(GENERATION_URL,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify({contents:[{parts:[{text:'Return the JSON object {"ok":true}.'}]}],generationConfig:{responseMimeType:'application/json',responseSchema:{type:'OBJECT',properties:{ok:{type:'BOOLEAN'}},required:['ok']},maxOutputTokens:256,thinkingConfig:{thinkingLevel:'low'}}}),signal:AbortSignal.timeout(30_000)});
+    const response=await send(GENERATION_URL,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify({contents:[{parts:[{text:'Return the JSON object {"ok":true}.'}]}],generationConfig:{responseMimeType:'application/json',responseSchema:{type:'OBJECT',properties:{ok:{type:'BOOLEAN'}},required:['ok']},maxOutputTokens:256,thinkingConfig:{thinkingLevel:'minimal'}}}),signal:AbortSignal.timeout(30_000)});
     if(!response.ok)return {ok:false,...await providerFailure(response)};
     const data=await response.json() as {candidates?:{finishReason?:string;content?:{parts?:{text?:string;thought?:boolean}[]}}[]};
     const candidate=data.candidates?.[0];

@@ -64,6 +64,6 @@ Worker integration covers bootstrap locking, password login, secure cookies, for
 
 ## Meal estimates and privacy
 
-Photos are resized to at most 1600 pixels and sent with optional notes to Google Gemini only when Analyze is selected. Meals and photos are not saved by the app. Calories use estimated macro grams and 4/4/9 factors. The 3D model visualizes ingredient calorie share, not actual food geometry or volume. Portion edits update numbers; qualitative observations describe the original photo. Estimates are not diagnoses or complete assessments of a person's diet.
+Photos are resized to at most 1280 pixels and sent with optional notes to Google Gemini only when Analyze is selected. Meals and photos are not saved by the app. Calories use estimated macro grams and 4/4/9 factors. The 3D model visualizes ingredient calorie share, not actual food geometry or volume. Portion edits update numbers; qualitative observations describe the original photo. Estimates are not diagnoses or complete assessments of a person's diet.
 
 Sample photo by Oskar Kadaksoo: https://unsplash.com/photos/a-bowl-of-food-on-a-plate-Be2IMDyTDII
